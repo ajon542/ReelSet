@@ -35,7 +35,7 @@ public class ReelLayout : MonoBehaviour
         {
             GameObject symbol = Instantiate(symbolPrefab, new Vector3(0, 0, 0), Quaternion.identity) as GameObject;
             symbol.transform.parent = gameObject.transform;
-            //symbol.SetActive(false);
+			symbol.SetActive (false);
             symbolPool.Enqueue(symbol);
         }
 
@@ -54,6 +54,7 @@ public class ReelLayout : MonoBehaviour
 
             GameObject symbol = symbolPool.Dequeue();
             symbol.transform.position = new Vector3(gameObject.transform.position.x, y, -1);
+			symbol.SetActive (true);
             symbolObjects.Add(symbol);
         }
     }
@@ -90,11 +91,11 @@ public class ReelLayout : MonoBehaviour
 
             GameObject symbol = symbolPool.Dequeue();
             symbol.transform.position = new Vector3(gameObject.transform.position.x, layoutCurve.Evaluate(topSymbolPosition));
-            //symbol.SetActive(true);
+            symbol.SetActive(true);
             symbolObjects.Insert(0, symbol);
 
             // Remove the last symbol.
-            //symbolObjects[symbolObjects.Count - 1].SetActive(false);
+            symbolObjects[symbolObjects.Count - 1].SetActive(false);
             symbolPool.Enqueue(symbolObjects[symbolObjects.Count - 1]);
             symbolObjects.RemoveAt(symbolObjects.Count - 1);
         }
