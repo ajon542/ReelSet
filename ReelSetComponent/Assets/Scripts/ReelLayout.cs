@@ -16,6 +16,8 @@ public class ReelLayout : MonoBehaviour
     [SerializeField]
     private float speed = 0.003f;
 
+    private Queue<GameObject> symbolPool = new Queue<GameObject>();
+
     // NOTE: PROTOTYPE CODE ONLY
     // This code is written mainly to test some ideas out. It is horrible and
     // I'm not convinced a single animation curve for the reel is the best way
@@ -29,7 +31,15 @@ public class ReelLayout : MonoBehaviour
             return;
         }
 
-        layoutCurve = AnimationCurve.Linear(0, 5, 1, -5);
+        for (int i = 0; i < 20; ++i)
+        {
+            GameObject symbol = Instantiate(symbolPrefab, new Vector3(0, 0, 0), Quaternion.identity) as GameObject;
+            symbol.transform.parent = gameObject.transform;
+            //symbol.SetActive(false);
+            symbolPool.Enqueue(symbol);
+        }
+
+        layoutCurve = AnimationCurve.Linear(0, 10, 1, -10);
 
         // Get the position of the top symbol. This will never change.
         // All other symbol positions will be calculation from this value.
@@ -42,8 +52,8 @@ public class ReelLayout : MonoBehaviour
         {
             float y = layoutCurve.Evaluate(i * topSymbolPosition);
 
-            GameObject symbol = Instantiate(symbolPrefab, new Vector3(0, y, -1), Quaternion.identity) as GameObject;
-            symbol.transform.parent = gameObject.transform;
+            GameObject symbol = symbolPool.Dequeue();
+            symbol.transform.position = new Vector3(gameObject.transform.position.x, y, -1);
             symbolObjects.Add(symbol);
         }
     }
@@ -78,12 +88,14 @@ public class ReelLayout : MonoBehaviour
             // Add a new symbol to the start of the list.
             topSymbolPosition -= symbolEnterPosition;
 
-            GameObject symbol = Instantiate(symbolPrefab, new Vector3(0, layoutCurve.Evaluate(topSymbolPosition), -1), Quaternion.identity) as GameObject;
-            symbol.transform.parent = gameObject.transform;
+            GameObject symbol = symbolPool.Dequeue();
+            symbol.transform.position = new Vector3(gameObject.transform.position.x, layoutCurve.Evaluate(topSymbolPosition));
+            //symbol.SetActive(true);
             symbolObjects.Insert(0, symbol);
 
             // Remove the last symbol.
-            Object.DestroyImmediate(symbolObjects[symbolObjects.Count - 1]);
+            //symbolObjects[symbolObjects.Count - 1].SetActive(false);
+            symbolPool.Enqueue(symbolObjects[symbolObjects.Count - 1]);
             symbolObjects.RemoveAt(symbolObjects.Count - 1);
         }
     }
