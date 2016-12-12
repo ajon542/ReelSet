@@ -23,6 +23,27 @@ public class ReelLayout : MonoBehaviour
     // I'm not convinced a single animation curve for the reel is the best way
     // to go at this point.
 
+    void OnDrawGizmos()
+    {
+        Gizmos.color = Color.green;
+
+        layoutCurve = AnimationCurve.Linear(0, 10, 1, -10);
+
+        // Get the position of the top symbol. This will never change.
+        // All other symbol positions will be calculation from this value.
+        int totalSymbols = visibleSymbols;
+
+        symbolEnterPosition = 1.0f / (totalSymbols + 1);
+        topSymbolPosition = symbolEnterPosition;
+
+        for (int i = 1; i <= totalSymbols; ++i)
+        {
+            float y = layoutCurve.Evaluate(i * topSymbolPosition);
+
+            Gizmos.DrawCube(new Vector3(gameObject.transform.position.x, y, -1), Vector3.one);
+        }
+    }
+
     // TODO: Draw a gizmo for the animation curve and symbol locations.
     void Start()
     {
@@ -35,7 +56,7 @@ public class ReelLayout : MonoBehaviour
         {
             GameObject symbol = Instantiate(symbolPrefab, new Vector3(0, 0, 0), Quaternion.identity) as GameObject;
             symbol.transform.parent = gameObject.transform;
-			symbol.SetActive (false);
+            symbol.SetActive(false);
             symbolPool.Enqueue(symbol);
         }
 
@@ -54,7 +75,7 @@ public class ReelLayout : MonoBehaviour
 
             GameObject symbol = symbolPool.Dequeue();
             symbol.transform.position = new Vector3(gameObject.transform.position.x, y, -1);
-			symbol.SetActive (true);
+            symbol.SetActive(true);
             symbolObjects.Add(symbol);
         }
     }
